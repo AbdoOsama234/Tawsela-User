@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1050838946652",
+    "project_id": "tawsela-77386",
+    "storage_bucket": "tawsela-77386.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1050838946652:android:af0dafa7abcc40bae5a799",
+        "android_client_info": {
+          "package_name": "com.example.users"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTN2VcI8gw_f1MCTXaFZxjGSKILqQfvxE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

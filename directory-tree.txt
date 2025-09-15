@@ -1,0 +1,33 @@
+lib/
+├── Assistants/
+│   ├── assistants_methods.dart
+│   ├── driver_request_flow.dart
+│   └── request_assistants.dart
+├── auth/
+│   ├── forget_password_screen.dart
+│   ├── login_screen.dart
+│   └── register_screen.dart
+├── global/
+│   └── global.dart
+├── infoHandler/
+│   └── app_info.dart
+├── models/
+│   ├── direction_details_info.dart
+│   ├── directions.dart
+│   ├── perdicted_places.dart
+│   └── user_model.dart
+├── screens/
+│   ├── drawer_screen.dart
+│   ├── precise_pickup_location.dart
+│   └── search_placed_screen.dart
+├── splachScreen/
+│   └── splach_screen.dart
+├── themeProvider/
+│   └── theme_provider.dart
+├── widgets/
+│   ├── place_prediction_tile.dart
+│   └── progress_dialog.dart
+├── firebase_options.dart
+├── main.dart
+├── main_screen.dart
+└── pay_fare_amount_dialog.dart
