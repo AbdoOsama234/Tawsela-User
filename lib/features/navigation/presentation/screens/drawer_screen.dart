@@ -1,8 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:users/auth/login_screen.dart';
-import 'package:users/global/global.dart';
+import 'package:users/core/constants/global.dart';
+
+import '../../../auth/presentation/screens/login_screen.dart';
 
 class DrawerScreen extends StatelessWidget {
   const DrawerScreen({super.key});

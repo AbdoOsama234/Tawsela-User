@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:users/Assistants/request_assistants.dart';
-import 'package:users/infoHandler/app_info.dart';
-import 'package:users/widgets/progress_dialog.dart';
+import 'package:users/core/widgets/progress_dialog.dart';
+import 'package:users/shared/state/app_info.dart';
 
-import '../global/global.dart';
-import '../models/directions.dart';
-import '../models/perdicted_places.dart';
+import '../../domain/entities/directions.dart';
+import '../../domain/entities/perdicted_places.dart';
+import '../../../../core/constants/global.dart';
+import '../../../../core/services/assistant_api/request_assistants.dart';
+
 
 class PlacePredictionTile extends StatefulWidget {
   final PerdictedPlaces perdictedPlaces;

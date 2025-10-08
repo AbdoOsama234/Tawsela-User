@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
-import 'package:users/auth/forget_password_screen.dart';
-import 'package:users/auth/register_screen.dart';
+import 'package:users/features/auth/presentation/screens/register_screen.dart';
 
-import '../global/global.dart';
-import '../main_screen.dart';
+import '../../../../core/constants/global.dart';
+import '../../../ride/presentation/screens/main_screen.dart';
+import 'forget_password_screen.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

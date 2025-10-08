@@ -1,33 +1,60 @@
 lib/
-├── Assistants/
-│   ├── assistants_methods.dart
-│   ├── driver_request_flow.dart
-│   └── request_assistants.dart
-├── auth/
-│   ├── forget_password_screen.dart
-│   ├── login_screen.dart
-│   └── register_screen.dart
-├── global/
-│   └── global.dart
-├── infoHandler/
-│   └── app_info.dart
-├── models/
-│   ├── direction_details_info.dart
-│   ├── directions.dart
-│   ├── perdicted_places.dart
-│   └── user_model.dart
-├── screens/
-│   ├── drawer_screen.dart
-│   ├── precise_pickup_location.dart
-│   └── search_placed_screen.dart
-├── splachScreen/
-│   └── splach_screen.dart
-├── themeProvider/
-│   └── theme_provider.dart
-├── widgets/
-│   ├── place_prediction_tile.dart
-│   └── progress_dialog.dart
-├── firebase_options.dart
-├── main.dart
-├── main_screen.dart
-└── pay_fare_amount_dialog.dart
+├── core/
+│   ├── config/
+│   │   └── firebase_options.dart
+│   ├── constants/
+│   │   └── global.dart
+│   ├── services/
+│   │   ├── assistant_api/
+│   │       ├── assistants_methods.dart
+│   │       └── request_assistants.dart
+│   ├── theme/
+│   │   └── theme_provider.dart
+│   ├── widgets/
+│       └── progress_dialog.dart
+├── features/
+│   ├── auth/
+│   │   ├── presentation/
+│   │       ├── screens/
+│   │           ├── forget_password_screen.dart
+│   │           ├── login_screen.dart
+│   │           └── register_screen.dart
+│   ├── navigation/
+│   │   ├── presentation/
+│   │       ├── screens/
+│   │           └── drawer_screen.dart
+│   ├── ride/
+│   │   ├── data/
+│   │   │   ├── drivers_repository.dart
+│   │   │   └── ride_request_repository.dart
+│   │   ├── domain/
+│   │   │   ├── entities/
+│   │   │   │   ├── direction_details_info.dart
+│   │   │   │   ├── directions.dart
+│   │   │   │   ├── driver_profile.dart
+│   │   │   │   └── perdicted_places.dart
+│   │   │   ├── usecases/
+│   │   │       └── driver_request_flow.dart
+│   │   ├── presentation/
+│   │       ├── controllers/
+│   │       │   └── ride_controller.dart
+│   │       ├── screens/
+│   │       │   ├── main_screen.dart
+│   │       │   ├── precise_pickup_location.dart
+│   │       │   └── search_placed_screen.dart
+│   │       ├── widgets/
+│   │           ├── address_chip.dart
+│   │           ├── driver_accepted_sheet.dart
+│   │           ├── location_row.dart
+│   │           ├── pay_fare_amount_dialog.dart
+│   │           ├── place_prediction_tile.dart
+│   │           ├── ride_tile.dart
+│   │           └── suggested_rides_sheet.dart
+│   ├── splachScreen/
+│       └── splach_screen.dart
+├── shared/
+│   ├── models/
+│   │   └── user_model.dart
+│   ├── state/
+│       └── app_info.dart
+└── main.dart

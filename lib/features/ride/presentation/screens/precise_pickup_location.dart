@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -7,10 +8,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
-import '../Assistants/assistants_methods.dart';
-import '../infoHandler/app_info.dart';
-import '../models/directions.dart';
-import '../main_screen.dart' show pickLocation; // بنستخدم المتغير الجلوبال الموجود في MainScreen
+import '../../../../core/services/assistant_api/assistants_methods.dart';
+import '../../../../shared/state/app_info.dart';
+import '../../domain/entities/directions.dart';
 
 class PrecisePickupLocation extends StatefulWidget {
   const PrecisePickupLocation({super.key});
@@ -26,7 +26,10 @@ class _PrecisePickupLocationState extends State<PrecisePickupLocation> {
   Position? userCurrentPosition;
   double bottomPaddingOfMap = 0;
 
-  // لعمل ديبونس لاستدعاء الـ Geocoding بعد توقف التحريك
+  // متغيّر محلي بدل الجلوبال
+  LatLng? _pinLatLng;
+
+  // ديبونس لوقف السبام على Geocoder2
   Timer? _idleDebounce;
 
   static const CameraPosition _kGooglePlex = CameraPosition(
@@ -39,48 +42,63 @@ class _PrecisePickupLocationState extends State<PrecisePickupLocation> {
     if (newGoogleMapController == null) return;
     final isDark = SchedulerBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
     final stylePath = isDark ? 'assets/map_style/dark_map.json' : 'assets/map_style/light_map.json';
-    final style = await rootBundle.loadString(stylePath);
-    await newGoogleMapController!.setMapStyle(style);
+    try {
+      final style = await rootBundle.loadString(stylePath);
+      await newGoogleMapController!.setMapStyle(style);
+    } catch (e) {
+      debugPrint('Map style load error: $e');
+    }
   }
   // ============================
 
-  Future<void> locationUserPosition() async {
+  Future<void> _goToUserPosition() async {
+    // تأكد من الصلاحيات
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      await Geolocator.openLocationSettings();
+      return;
+    }
+    var perm = await Geolocator.checkPermission();
+    if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
+    if (perm == LocationPermission.deniedForever) {
+      await Geolocator.openAppSettings();
+      return;
+    }
+
     final cPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     userCurrentPosition = cPosition;
 
-    final latLngPosition = LatLng(userCurrentPosition!.latitude, userCurrentPosition!.longitude);
-    final cameraPosition = CameraPosition(target: latLngPosition, zoom: 15);
+    final latLng = LatLng(cPosition.latitude, cPosition.longitude);
+    final cam = CameraPosition(target: latLng, zoom: 15);
+    await newGoogleMapController?.animateCamera(CameraUpdate.newCameraPosition(cam));
 
-    if (newGoogleMapController != null) {
-      await newGoogleMapController!.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-    }
-
-    // حدّث عنوان الـ From في AppInfo (هيتعرَض في الواجهة)
+    // حدّث عنوان الـ From (هيظهر في الواجهة الرئيسية)
     await AssistantsMehods.searchAddressForGeographCoOrdinates(cPosition, context);
 
-    // خليه برضه هو pickLocation الافتراضي
-    pickLocation = latLngPosition;
+    // خلي المؤشر الافتراضي نفس مكان المستخدم
+    _pinLatLng = latLng;
+    // اعمل ريفيرس جيكود أول مرة
+    _reverseGeocodePin();
   }
 
-  Future<void> _reverseGeocodePickLocation() async {
+  Future<void> _reverseGeocodePin() async {
     try {
-      if (pickLocation == null) return;
-
+      if (_pinLatLng == null) return;
       final data = await Geocoder2.getDataFromCoordinates(
-        latitude: pickLocation!.latitude,
-        longitude: pickLocation!.longitude,
-        googleMapApiKey: "AIzaSyBDJ5s8ORghEYD0ttmVrMgVH334Uk4tMH0",
+        latitude: _pinLatLng!.latitude,
+        longitude: _pinLatLng!.longitude,
+        googleMapApiKey: "YOUR_GOOGLE_KEY_HERE",
         language: 'ar',
       );
 
-      final userPickUpAddress = Directions()
-        ..locationLatitude = pickLocation!.latitude
-        ..locationLongitude = pickLocation!.longitude
+      final pick = Directions()
+        ..locationLatitude = _pinLatLng!.latitude
+        ..locationLongitude = _pinLatLng!.longitude
         ..locationName = data.address;
 
       if (!mounted) return;
-      context.read<AppInfo>().updatePickUpLocationAddress(userPickUpAddress);
-      setState(() {}); // لو عايز تعكس الاسم فوراً في الـ UI
+      context.read<AppInfo>().updatePickUpLocationAddress(pick);
+      setState(() {}); // لو حابب تحدّث الـ UI بالعنوان فورًا
     } catch (e) {
       debugPrint("Reverse geocoding error: $e");
     }
@@ -101,7 +119,7 @@ class _PrecisePickupLocationState extends State<PrecisePickupLocation> {
       body: Stack(
         children: [
           GoogleMap(
-            padding: const EdgeInsets.only(top: 30, right: 0, bottom: 80, left: 10), // رفع زر my-location
+            padding: const EdgeInsets.only(top: 30, right: 0, bottom: 80, left: 10),
             mapType: MapType.normal,
             initialCameraPosition: _kGooglePlex,
             myLocationEnabled: true,
@@ -109,19 +127,17 @@ class _PrecisePickupLocationState extends State<PrecisePickupLocation> {
             zoomControlsEnabled: true,
             zoomGesturesEnabled: true,
             onMapCreated: (GoogleMapController controller) async {
-              _controllerGoogleMap.complete(controller);
+              if (!_controllerGoogleMap.isCompleted) _controllerGoogleMap.complete(controller);
               newGoogleMapController = controller;
               setState(() => bottomPaddingOfMap = 200);
               await _applyMapStyle();
-              await locationUserPosition();
+              await _goToUserPosition();
             },
             onCameraMove: (CameraPosition position) {
-              // خزّن نقطة المؤشر
-              pickLocation = position.target;
+              _pinLatLng = position.target;
 
-              // ديبونس: كل ما يتحرك نلغي القديم ونستنى 450ms بعد آخر حركة
               _idleDebounce?.cancel();
-              _idleDebounce = Timer(const Duration(milliseconds: 450), _reverseGeocodePickLocation);
+              _idleDebounce = Timer(const Duration(milliseconds: 450), _reverseGeocodePin);
             },
           ),
 
@@ -144,9 +160,7 @@ class _PrecisePickupLocationState extends State<PrecisePickupLocation> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 3),
-                ],
+                boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 3)],
               ),
               child: SafeArea(
                 top: false,
@@ -164,25 +178,22 @@ class _PrecisePickupLocationState extends State<PrecisePickupLocation> {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          if (pickLocation == null) {
+                          if (_pinLatLng == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text("حرّك الخريطة وحدّد مكانك أولاً")),
                             );
                             return;
                           }
 
-                          // ضَمّن آخر عنوان تم حفظه
                           final currentName =
                               context.read<AppInfo>().userPickupLocation?.locationName;
 
                           final info = Directions()
-                            ..locationLatitude = pickLocation!.latitude
-                            ..locationLongitude = pickLocation!.longitude
+                            ..locationLatitude = _pinLatLng!.latitude
+                            ..locationLongitude = _pinLatLng!.longitude
                             ..locationName = currentName ?? "Selected location";
 
                           context.read<AppInfo>().updatePickUpLocationAddress(info);
-
-                          // ارجع للشاشة السابقة بقيمة مفهومة
                           Navigator.pop(context, "pickupUpdated");
                         },
                         icon: const Icon(Icons.edit_location_alt, size: 18),
@@ -190,9 +201,7 @@ class _PrecisePickupLocationState extends State<PrecisePickupLocation> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: darkTheme ? Colors.purple : Colors.blue,
                           foregroundColor: darkTheme ? Colors.black : Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                       ),
@@ -223,24 +232,16 @@ Widget _buildLocationRow({
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.blue,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
+            Text(label,
+                style: const TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1),
             const SizedBox(height: 2),
-            Text(
-              value,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              softWrap: false,
-            ),
+            Text(value,
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                softWrap: false),
           ],
         ),
       ),

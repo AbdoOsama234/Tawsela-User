@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:users/Assistants/request_assistants.dart';
-import 'package:users/widgets/place_prediction_tile.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/perdicted_places.dart';
+import '../../../../core/services/assistant_api/request_assistants.dart';
+import '../widgets/place_prediction_tile.dart';
+import '../../domain/entities/perdicted_places.dart';
 
 class SearchPlaced extends StatefulWidget {
   const SearchPlaced({super.key});

@@ -1,15 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:users/auth/register_screen.dart';
-import 'package:users/infoHandler/app_info.dart';
-import 'package:users/main_screen.dart';
-import 'package:users/screens/search_placed_screen.dart';
-import 'package:users/splachScreen/splach_screen.dart';
-import 'package:users/themeProvider/theme_provider.dart';
+import 'package:users/features/auth/presentation/screens/login_screen.dart';
+import 'package:users/shared/state/app_info.dart';
+import 'package:users/core/theme/theme_provider.dart';
 
-import 'auth/login_screen.dart';
-import 'firebase_options.dart';
+import 'core/config/firebase_options.dart';
+import 'features/ride/presentation/screens/main_screen.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized(); // 👈 السطر المهم
@@ -35,7 +32,7 @@ class MyApp extends StatelessWidget {
         darkTheme: MyThemes.darkTheme,
 
         debugShowCheckedModeBanner: false ,
-        home: MainScreen(),
+        home: MainScreen( ),
       ),
     );
   }

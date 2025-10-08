@@ -4,13 +4,13 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:users/Assistants/request_assistants.dart';
-import 'package:users/global/global.dart';
-import 'package:users/infoHandler/app_info.dart';
-import 'package:users/models/directions.dart';
-import 'package:users/models/user_model.dart';
+import 'package:users/core/constants/global.dart';
+import 'package:users/core/services/assistant_api/request_assistants.dart';
+import 'package:users/shared/state/app_info.dart';
+import 'package:users/shared/models/user_model.dart';
 
-import '../models/direction_details_info.dart';
+import '../../../features/ride/domain/entities/direction_details_info.dart';
+import '../../../features/ride/domain/entities/directions.dart';
 
 class AssistantsMehods {
   /// قراءة بيانات المستخدم الحالي من Firebase

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:users/models/direction_details_info.dart';
-import '../models/user_model.dart';
+import 'package:users/features/ride/domain/entities/direction_details_info.dart';
+import '../../shared/models/user_model.dart';
 
 final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
